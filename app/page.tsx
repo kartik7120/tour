@@ -1,113 +1,149 @@
-import Image from "next/image";
+"use client";
+import { useForm, SubmitHandler, Controller } from "react-hook-form"
+import TextField from '@mui/material/TextField';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import React from "react";
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Button from '@mui/material/Button';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import Typography from '@mui/material/Typography';
+import { useRouter } from "next/navigation";
+
+export interface Form {
+  title: string,
+  start_date: string,
+  end_date: string,
+  recurrence: "daily" | "weekly",
+  days?: string[]
+}
 
 export default function Home() {
+
+  const router = useRouter();
+
+  const { register, control, handleSubmit, reset, formState, watch } = useForm<Form>({
+    defaultValues: {
+      title: "",
+      start_date: "",
+      end_date: "",
+      recurrence: "daily",
+      days: []
+    },
+  })
+
+  const recurrence = watch("recurrence");
+
+  const onSubmit: SubmitHandler<Form> = async (data) => {
+    console.log('hello')
+    console.log(data);
+    try {
+      const response = await fetch("http://localhost:3000/api/tour", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const res = await response.json();
+      if (res.message === "redirect")
+        router.push("/tourlist");
+    } catch (error) {
+      // any logging service and handle error message
+      console.error(error);
+    }
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <main className="flex min-h-screen flex-col items-center p-24">
+        <Typography variant="h1" gutterBottom>
+          Tour Creation Form
+        </Typography>
+        <form onSubmit={handleSubmit(onSubmit, () => { console.log("invalid") })}>
+          <div className="flex flex-row items-center gap-x-5">
+            <TextField id="outlined-basic" label="Title" variant="outlined" required {...register("title")} />
+            {formState.errors.title && <span>This field is required</span>}
+            <Controller
+              name="start_date"
+              rules={{ required: true }}
+              control={control}
+              render={({ field }) => (
+                <DatePicker
+                  label="Start Date"
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+            {formState.errors.start_date && <p className="text-red-400">{formState.errors.start_date.message}</p>}
+            <Controller
+              name="end_date"
+              control={control}
+              render={({ field }) => (
+                <DatePicker
+                  label="End Date"
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+            {formState.errors.end_date && <p className="text-red-400">{formState.errors.end_date.message}</p>}
+          </div>
+          <div className="flex flex-col justify-center items-start gap-y-5">
+            <Controller
+              name="recurrence"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (<>
+                <InputLabel id="age">Recurrence</InputLabel>
+                <Select
+                  labelId="age"
+                  id="demo-simple-select"
+                  value={field.value}
+                  label="Recurrence"
+                  onChange={(e: SelectChangeEvent) => field.onChange(e.target.value)}
+                >
+                  <MenuItem value={"daily"}>Daily</MenuItem>
+                  <MenuItem value={"weekly"}>Weekly</MenuItem>
+                </Select>
+              </>
+              )}
+            />
+            {recurrence === "weekly" && (<>
+              <InputLabel id="age">Days</InputLabel>
+              <Controller
+                name="days"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Select
+                    multiple
+                    labelId="Week Days"
+                    id="demo-simple-select"
+                    value={field.value}
+                    label="Days"
+                    onChange={(e: SelectChangeEvent) => field.onChange(e.target.value)}
+                  >
+                    <MenuItem value={"monday"}>Monday</MenuItem>
+                    <MenuItem value={"tuesday"}>Tuesday</MenuItem>
+                    <MenuItem value={"wednesday"}>Wednesday</MenuItem>
+                    <MenuItem value={"thursday"}>Thursday</MenuItem>
+                    <MenuItem value={"friday"}>Friday</MenuItem>
+                    <MenuItem value={"saturday"}>Saturday</MenuItem>
+                    <MenuItem value={"sunday"}>Sunday</MenuItem>
+                  </Select>
+                )}
+              />
+            </>
+            )}
+            <Button variant="contained" type="submit" style={{ display: "block" }}>Submit</Button>
+          </div>
+        </form>
+      </main >
+    </LocalizationProvider>
   );
 }
