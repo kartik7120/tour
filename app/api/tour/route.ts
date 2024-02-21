@@ -1,25 +1,40 @@
+import dbConnect from "@/db/dbConnect";
+import Tour from "@/models/tour";
 import { redirect } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest, res: NextResponse) {
-    const searchParams = req.nextUrl.searchParams;
-    // const title = searchParams.get("title");
-    // const start_date = searchParams.get("start_date");
-    // const end_date = searchParams.get("end_date");
-    // const recurrence = searchParams.get("recurrence");
-    // const days = searchParams.getAll("days");
-    // console.log(title, start_date, end_date, recurrence, days);
-    console.log(req.body)
-    console.log("Hello from tour path")
-    //   const response = await fetch("http://localhost:3000/api/tour", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({ title, start_date, end_date, recurrence, days }),
-    //   });
-    //   const data = await response.json();
-    //   console.log(data);
-    const url = new URL(req.url);
-    return NextResponse.json({ message: "redirect" });
+export async function POST(req: Request, res: NextResponse) {
+    try {
+        const body = await req.json();
+        await dbConnect();
+        const tour = new Tour({
+            title: body.title,
+            start_date: body.start_date,
+            end_date: body.end_date,
+            recurrence: body.recurrence,
+            days: body.days
+        });
+        await tour.save();
+        return NextResponse.json({ message: "redirect" });
+    } catch (error) {
+        console.log(error);
+        return NextResponse.json({ message: "Something went wrong" });
+    }
+}
+
+export async function GET(req: NextRequest, res: NextResponse) {
+    console.log("Hello from tour path");
+
+    try {
+        await dbConnect();
+
+        const tours = await Tour.find({}).sort({ createdAt: "desc" }).limit(20);
+        return NextResponse.json({ tours });
+
+    } catch (error) {
+        console.log(error);
+        NextResponse.json({ message: "Something went wrong" });
+    }
+
+    return NextResponse.json({ message: "Hello from tour path" });
 }
