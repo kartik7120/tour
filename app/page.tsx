@@ -37,8 +37,6 @@ export default function Home() {
   const recurrence = watch("recurrence");
 
   const onSubmit: SubmitHandler<Form> = async (data) => {
-    console.log('hello')
-    console.log(data);
     try {
       const response = await fetch("http://localhost:3000/api/tour", {
         method: "POST",
