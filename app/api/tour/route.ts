@@ -23,8 +23,6 @@ export async function POST(req: Request, res: NextResponse) {
 }
 
 export async function GET(req: NextRequest, res: NextResponse) {
-    console.log("Hello from tour path");
-
     try {
         await dbConnect();
 
@@ -33,8 +31,6 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     } catch (error) {
         console.log(error);
-        NextResponse.json({ message: "Something went wrong" });
+       return NextResponse.json({ message: "Something went wrong" });
     }
-
-    return NextResponse.json({ message: "Hello from tour path" });
 }
