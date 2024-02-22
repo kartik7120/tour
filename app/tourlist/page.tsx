@@ -96,7 +96,7 @@ export default function Page() {
 
   const handleBooking = async (data: TourForm) => {
     try {
-      const response = await fetch("http://localhost:3000/api/tour/book", {
+      const response = await fetch(`${process.env.VERCEL_URL}/api/tour/book`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
