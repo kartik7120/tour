@@ -17,7 +17,7 @@ export interface Form {
   start_date: string,
   end_date: string,
   recurrence: "daily" | "weekly",
-  days?: string
+  days?: string[]
 }
 
 export default function Home() {
@@ -30,7 +30,7 @@ export default function Home() {
       start_date: "",
       end_date: "",
       recurrence: "daily",
-      days: ''
+      days: ['']
     },
   })
 
@@ -122,6 +122,7 @@ export default function Home() {
                     multiple
                     labelId="Week Days"
                     id="demo-simple-select"
+                    // @ts-ignore
                     value={field.value}
                     label="Days"
                     onChange={(e: SelectChangeEvent) => field.onChange(e.target.value)}
