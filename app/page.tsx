@@ -38,6 +38,7 @@ export default function Home() {
 
   const onSubmit: SubmitHandler<Form> = async (data) => {
     try {
+      console.log(`https://${process.env.VERCEL_URL}/api/tour`);
       const response = await fetch(`https://${process.env.VERCEL_URL}/api/tour`, {
         method: "POST",
         headers: {
